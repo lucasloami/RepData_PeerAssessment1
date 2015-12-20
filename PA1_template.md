@@ -9,14 +9,38 @@ output:
 ## Loading and preprocessing the data
 I will load the libraries that will be used in this assignment as well as 
 set the LocalTime to get weekdays in English
-```{r}
+
+```r
 library(dplyr)
 library(lattice)
 Sys.setlocale("LC_TIME", "English")
+```
 
+```
+## [1] "English_United States.1252"
+```
+
+```r
 data <- read.csv(file="./data/activity.csv", head=TRUE, sep=",")
 head(data)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
+```r
 names(data)
+```
+
+```
+## [1] "steps"    "date"     "interval"
 ```
 
 ## What is mean total number of steps taken per day?
@@ -32,10 +56,22 @@ day
 
 Missing days (NA values) will be ignored
 
-```{r}
+
+```r
 total_steps <- aggregate(steps ~ date, data=data, FUN=sum, na.rm=TRUE)
 mean(total_steps$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(total_steps$steps)
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -48,18 +84,27 @@ and the average number of steps taken, averaged across all days (y-axis)
 2. Which 5-minute interval, on average across all the days in the dataset, contains
 the maximum number of steps?
 
-```{r}
+
+```r
 activity <- aggregate(steps ~ interval, data=data, FUN=mean, na.rm=TRUE)
 
 plot(activity$interval, activity$steps, type='l', col=1,
    main="Average number of steps", xlab="Interval",
    ylab="Average number of steps")
+```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
 
+```r
 max_steps_in_interval_row <- which.max(activity$steps)
 
 # 5-minute interval desired
 activity[max_steps_in_interval_row, ]
+```
+
+```
+##     interval    steps
+## 104      835 206.1698
 ```
 
 ## Imputing missing values
@@ -80,12 +125,19 @@ report the mean and median total number of steps taken per day. Do these values
 differ from the estimates from the first part of the assignment? What is the impact
 of imputing missing data on the estimates of the total daily number of steps?
 
-```{r}
+
+```r
 NA_counter <- sum(is.na(data))
 
 #number of NAs
 NA_counter
+```
 
+```
+## [1] 2304
+```
+
+```r
 #fill NA with mean of steps per interval in day
 mean_activity <- aggregate(steps ~ interval, data=data, FUN=mean, na.rm=TRUE)
 new_data <- data
@@ -100,11 +152,26 @@ for (i in 1:nrow(data)) {
 
 new_activity <- aggregate(steps ~ date, data=new_data, FUN=sum, na.rm=TRUE)
 hist(new_activity$steps, main = "Total steps by day")
+```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
+```r
 #new mean
 mean(new_activity$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 #new median
 median(new_activity$steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 The average value remains the sam after filling NA values, but the median value
@@ -120,7 +187,8 @@ This assignment description is:
 interval (x-axis) and the average number of steps taken, averaged across all weekday
 days or weekend days (y-axis).
 
-```{r}
+
+```r
 new_data$date <- as.Date(new_data$date, "%Y-%m-%d")
 day <- weekdays(new_data$date)
 day_type <- vector()
@@ -139,3 +207,5 @@ steps_per_day <- aggregate(steps ~ interval + day_type, data=new_data, na.rm=TRU
 xyplot(steps ~ interval | day_type, steps_per_day, type = "l", layout = c(1, 2),
   xlab = "Interval", ylab = "Number of steps")
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 

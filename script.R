@@ -1,5 +1,11 @@
+
 # source('script.R')
-#  get_data()
+# init()
+
+# library('knitr')
+# knit2html('PA1_template.Rmd')
+# browseURL('PA1_template.html')
+
 
 library(dplyr)
 library(lattice)
@@ -110,9 +116,9 @@ question_04 <- function(data) {
 
 init <- function() {
   data <- get_data()
-  # data <- clean_data(data)
-  # question_01(data)
+  data <- clean_data(data)
+  question_01(data)
   # question_02(data)
   # question_03(data)
-  question_04(data)
+  # question_04(data)
 }
