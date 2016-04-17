@@ -1,6 +1,6 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
+output:
   html_document:
     keep_md: true
 ---
@@ -11,6 +11,7 @@ I will load the libraries that will be used in this assignment as well as
 set the LocalTime to get weekdays in English
 
 ```r
+library(knitr)
 library(dplyr)
 library(lattice)
 Sys.setlocale("LC_TIME", "English")
@@ -19,20 +20,23 @@ Sys.setlocale("LC_TIME", "English")
 ```
 ## [1] "English_United States.1252"
 ```
+Here I will read the data and store in a variable. Missing days (NA values) will be ignored
+
 
 ```r
-data <- read.csv(file="./data/activity.csv", head=TRUE, sep=",")
+dataOriginal <- read.csv(file="./data/activity.csv", head=TRUE, sep=",")
+data <- na.omit(dataOriginal)
 head(data)
 ```
 
 ```
-##   steps       date interval
-## 1    NA 2012-10-01        0
-## 2    NA 2012-10-01        5
-## 3    NA 2012-10-01       10
-## 4    NA 2012-10-01       15
-## 5    NA 2012-10-01       20
-## 6    NA 2012-10-01       25
+##     steps       date interval
+## 289     0 2012-10-02        0
+## 290     0 2012-10-02        5
+## 291     0 2012-10-02       10
+## 292     0 2012-10-02       15
+## 293     0 2012-10-02       20
+## 294     0 2012-10-02       25
 ```
 
 ```r
@@ -54,11 +58,81 @@ day
 
 3. Calculate and report the mean and median of the total number of steps taken per day
 
-Missing days (NA values) will be ignored
-
 
 ```r
-total_steps <- aggregate(steps ~ date, data=data, FUN=sum, na.rm=TRUE)
+total_steps <- aggregate(steps ~ date, data=data, FUN=sum)
+
+# Total number of steps per day
+total_steps
+```
+
+```
+##          date steps
+## 1  2012-10-02   126
+## 2  2012-10-03 11352
+## 3  2012-10-04 12116
+## 4  2012-10-05 13294
+## 5  2012-10-06 15420
+## 6  2012-10-07 11015
+## 7  2012-10-09 12811
+## 8  2012-10-10  9900
+## 9  2012-10-11 10304
+## 10 2012-10-12 17382
+## 11 2012-10-13 12426
+## 12 2012-10-14 15098
+## 13 2012-10-15 10139
+## 14 2012-10-16 15084
+## 15 2012-10-17 13452
+## 16 2012-10-18 10056
+## 17 2012-10-19 11829
+## 18 2012-10-20 10395
+## 19 2012-10-21  8821
+## 20 2012-10-22 13460
+## 21 2012-10-23  8918
+## 22 2012-10-24  8355
+## 23 2012-10-25  2492
+## 24 2012-10-26  6778
+## 25 2012-10-27 10119
+## 26 2012-10-28 11458
+## 27 2012-10-29  5018
+## 28 2012-10-30  9819
+## 29 2012-10-31 15414
+## 30 2012-11-02 10600
+## 31 2012-11-03 10571
+## 32 2012-11-05 10439
+## 33 2012-11-06  8334
+## 34 2012-11-07 12883
+## 35 2012-11-08  3219
+## 36 2012-11-11 12608
+## 37 2012-11-12 10765
+## 38 2012-11-13  7336
+## 39 2012-11-15    41
+## 40 2012-11-16  5441
+## 41 2012-11-17 14339
+## 42 2012-11-18 15110
+## 43 2012-11-19  8841
+## 44 2012-11-20  4472
+## 45 2012-11-21 12787
+## 46 2012-11-22 20427
+## 47 2012-11-23 21194
+## 48 2012-11-24 14478
+## 49 2012-11-25 11834
+## 50 2012-11-26 11162
+## 51 2012-11-27 13646
+## 52 2012-11-28 10183
+## 53 2012-11-29  7047
+```
+
+```r
+# Histogram
+hist(total_steps$steps, main="Histogram: total steps taken per day", xlab="total number of steps")
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+```r
+# Mean and median
+
 mean(total_steps$steps)
 ```
 
@@ -93,7 +167,7 @@ plot(activity$interval, activity$steps, type='l', col=1,
    ylab="Average number of steps")
 ```
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
 
 ```r
 max_steps_in_interval_row <- which.max(activity$steps)
@@ -127,7 +201,7 @@ of imputing missing data on the estimates of the total daily number of steps?
 
 
 ```r
-NA_counter <- sum(is.na(data))
+NA_counter <- sum(is.na(dataOriginal))
 
 #number of NAs
 NA_counter
@@ -140,10 +214,10 @@ NA_counter
 ```r
 #fill NA with mean of steps per interval in day
 mean_activity <- aggregate(steps ~ interval, data=data, FUN=mean, na.rm=TRUE)
-new_data <- data
-for (i in 1:nrow(data)) {
-  if(is.na(data$steps[i])) {
-    interval <- data$interval[i]
+new_data <- dataOriginal
+for (i in 1:nrow(dataOriginal)) {
+  if(is.na(dataOriginal$steps[i])) {
+    interval <- dataOriginal$interval[i]
     interval_row <- which(mean_activity$interval == interval)
     step <- mean_activity$steps[interval_row]
     new_data$steps[i] <- step
@@ -154,7 +228,7 @@ new_activity <- aggregate(steps ~ date, data=new_data, FUN=sum, na.rm=TRUE)
 hist(new_activity$steps, main = "Total steps by day")
 ```
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
 
 ```r
 #new mean
@@ -208,4 +282,4 @@ xyplot(steps ~ interval | day_type, steps_per_day, type = "l", layout = c(1, 2),
   xlab = "Interval", ylab = "Number of steps")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 

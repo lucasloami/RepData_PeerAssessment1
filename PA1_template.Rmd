@@ -1,6 +1,6 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
+output:
   html_document:
     keep_md: true
 ---
@@ -9,12 +9,17 @@ output:
 ## Loading and preprocessing the data
 I will load the libraries that will be used in this assignment as well as 
 set the LocalTime to get weekdays in English
-```{r}
+```{r echo=TRUE}
+library(knitr)
 library(dplyr)
 library(lattice)
 Sys.setlocale("LC_TIME", "English")
+```
+Here I will read the data and store in a variable. Missing days (NA values) will be ignored
 
-data <- read.csv(file="./data/activity.csv", head=TRUE, sep=",")
+```{r echo=TRUE}
+dataOriginal <- read.csv(file="./data/activity.csv", head=TRUE, sep=",")
+data <- na.omit(dataOriginal)
 head(data)
 names(data)
 ```
@@ -30,10 +35,17 @@ day
 
 3. Calculate and report the mean and median of the total number of steps taken per day
 
-Missing days (NA values) will be ignored
+```{r echo=TRUE}
+total_steps <- aggregate(steps ~ date, data=data, FUN=sum)
 
-```{r}
-total_steps <- aggregate(steps ~ date, data=data, FUN=sum, na.rm=TRUE)
+# Total number of steps per day
+total_steps
+
+# Histogram
+hist(total_steps$steps, main="Histogram: total steps taken per day", xlab="total number of steps")
+
+# Mean and median
+
 mean(total_steps$steps)
 median(total_steps$steps)
 ```
@@ -48,7 +60,7 @@ and the average number of steps taken, averaged across all days (y-axis)
 2. Which 5-minute interval, on average across all the days in the dataset, contains
 the maximum number of steps?
 
-```{r}
+```{r echo=TRUE}
 activity <- aggregate(steps ~ interval, data=data, FUN=mean, na.rm=TRUE)
 
 plot(activity$interval, activity$steps, type='l', col=1,
@@ -80,18 +92,18 @@ report the mean and median total number of steps taken per day. Do these values
 differ from the estimates from the first part of the assignment? What is the impact
 of imputing missing data on the estimates of the total daily number of steps?
 
-```{r}
-NA_counter <- sum(is.na(data))
+```{r echo=TRUE}
+NA_counter <- sum(is.na(dataOriginal))
 
 #number of NAs
 NA_counter
 
 #fill NA with mean of steps per interval in day
 mean_activity <- aggregate(steps ~ interval, data=data, FUN=mean, na.rm=TRUE)
-new_data <- data
-for (i in 1:nrow(data)) {
-  if(is.na(data$steps[i])) {
-    interval <- data$interval[i]
+new_data <- dataOriginal
+for (i in 1:nrow(dataOriginal)) {
+  if(is.na(dataOriginal$steps[i])) {
+    interval <- dataOriginal$interval[i]
     interval_row <- which(mean_activity$interval == interval)
     step <- mean_activity$steps[interval_row]
     new_data$steps[i] <- step
@@ -120,7 +132,7 @@ This assignment description is:
 interval (x-axis) and the average number of steps taken, averaged across all weekday
 days or weekend days (y-axis).
 
-```{r}
+```{r echo=TRUE}
 new_data$date <- as.Date(new_data$date, "%Y-%m-%d")
 day <- weekdays(new_data$date)
 day_type <- vector()
